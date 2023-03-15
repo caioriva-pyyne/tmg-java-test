@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @ToString()
 @NoArgsConstructor
-public class StackItemDTO {
+public class StackItem {
     @NotBlank(message = "A value for an item is required to push")
     private String value;
 }

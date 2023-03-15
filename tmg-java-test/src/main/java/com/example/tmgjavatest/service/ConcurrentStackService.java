@@ -6,8 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Service
-public class ConcurrentStackServiceImpl implements StackService {
-    private static final String EMPTY_STACK_MSG = "The stack is empty!";
+public class ConcurrentStackService implements StackService {
     private final ConcurrentLinkedDeque<String> stack = new ConcurrentLinkedDeque<>();
 
     @Override
