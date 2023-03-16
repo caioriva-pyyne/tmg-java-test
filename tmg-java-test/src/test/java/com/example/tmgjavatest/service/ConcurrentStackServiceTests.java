@@ -18,7 +18,7 @@ public class ConcurrentStackServiceTests {
     }
 
     @Test
-    public void stackService_inTheNormalWorkflow_shouldWorkAsExpected() {
+    public void classConcurrentStackService_inTheNormalWorkflow_shouldWorkAsExpected() {
         var helloValue = "Hello";
         var worldValue = "World";
         var againValue = "Again";
@@ -41,7 +41,7 @@ public class ConcurrentStackServiceTests {
     }
 
     @Test
-    public void stackService_withConcurrentActions_shouldPopDuplicates()
+    public void classConcurrentStackService_withConcurrentActions_shouldNotPopDuplicates()
             throws ExecutionException, InterruptedException {
         // Arrange
         var testValueA = "ut-A";

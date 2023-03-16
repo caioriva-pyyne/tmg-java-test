@@ -1,1 +1,1 @@
-# tmg-java-test
+# Repository for TMG Test

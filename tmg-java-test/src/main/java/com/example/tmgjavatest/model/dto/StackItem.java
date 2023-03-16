@@ -1,11 +1,10 @@
 package com.example.tmgjavatest.model.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Setter
-@ToString()
 @NoArgsConstructor
 public class StackItem {
     @NotBlank(message = "A value for an item is required to push")

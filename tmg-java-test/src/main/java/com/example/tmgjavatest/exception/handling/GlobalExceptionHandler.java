@@ -1,4 +1,4 @@
-package com.example.tmgjavatest.exception;
+package com.example.tmgjavatest.exception.handling;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
