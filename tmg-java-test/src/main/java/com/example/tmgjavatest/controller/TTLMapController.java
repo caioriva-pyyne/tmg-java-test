@@ -4,6 +4,7 @@ import com.example.tmgjavatest.model.dto.TTLMapKVPair;
 import com.example.tmgjavatest.service.TTLMapService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -30,12 +31,12 @@ public class TTLMapController {
     }
 
     @GetMapping(value = "/get")
-    public String get(@RequestParam @NotBlank(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) String key) {
+    public String get(@NotEmpty(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) @RequestParam String key) {
         return mapService.get(key);
     }
 
     @DeleteMapping(value = "/remove")
-    public void remove(@RequestParam @NotBlank(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) String key) {
+    public void remove(@NotEmpty(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) @RequestParam String key) {
         mapService.remove(key);
     }
 }

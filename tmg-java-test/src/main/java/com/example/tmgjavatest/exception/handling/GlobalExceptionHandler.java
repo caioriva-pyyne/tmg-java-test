@@ -1,5 +1,7 @@
 package com.example.tmgjavatest.exception.handling;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,17 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(FieldError::getDefaultMessage)
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST, Instant.now(), errors),
+                new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationErrors(ConstraintViolationException ex) {
+        List<String> errors = ex.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
                 .collect(Collectors.toList());
 
         return new ResponseEntity<>(new ErrorResponse(HttpStatus.BAD_REQUEST, Instant.now(), errors),
