@@ -2,6 +2,7 @@ package com.example.tmgjavatest.controller;
 
 import com.example.tmgjavatest.TestType;
 import com.example.tmgjavatest.TmgJavaTestApplication;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,8 +15,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Duration;
 import java.util.stream.Stream;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -33,6 +36,7 @@ public class TTLMapControllerTests {
 
     @Test
     public void put_onNormalWorkflow_returns200() throws Exception {
+        // Act and assert
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"key\":\"key\", \"value\":\"value\"}"))
@@ -41,6 +45,7 @@ public class TTLMapControllerTests {
 
     @Test
     public void put_onNormalWorkflow_shouldAcceptTTLAndReturn200() throws Exception {
+        // Act and assert
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": 1}"))
@@ -50,6 +55,7 @@ public class TTLMapControllerTests {
     @ParameterizedTest
     @MethodSource(value = "keyValueSource")
     public void put_withEmptyOrNonexistentKeyOrValue_returns400(String requestBody, String errorMessage) throws Exception {
+        // Act and assert
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -62,11 +68,13 @@ public class TTLMapControllerTests {
 
     @Test
     public void get_onNormalWorkflow_returns200() throws Exception {
+        // Arrange
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"key\":\"key\", \"value\":\"value\"}"))
                 .andExpect(status().isOk());
 
+        // Act and assert
         mvc.perform(get("/map/get?key=key"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
@@ -75,21 +83,22 @@ public class TTLMapControllerTests {
 
     @Test
     public void get_onNormalWorkflowWithExpiredKey_returns200() throws Exception {
+        // Arrange
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": 1}"))
                 .andExpect(status().isOk());
 
-        Thread.sleep(1000);
-
-        mvc.perform(get("/map/get?key=key"))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(""));
+        // Act and assert
+        await().atMost(Duration.ofSeconds(2L)).until(() -> Assertions.assertDoesNotThrow(
+                () -> mvc.perform(get("/map/get?key=key"))
+                        .andExpect(status().isOk())
+                        .andReturn().getResponse().getContentAsString().isEmpty()));
     }
 
     @Test
     public void get_withEmptyKey_returns400() throws Exception {
+        // Act and assert
         mvc.perform(get("/map/get?key=")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())

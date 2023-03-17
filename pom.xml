@@ -17,6 +17,7 @@
         <java.version>19</java.version>
         <maven-surefire.version>3.0.0</maven-surefire.version>
         <maven-failsafe.version>3.0.0</maven-failsafe.version>
+        <awaitility.version>4.2.0</awaitility.version>
     </properties>
     <dependencies>
         <dependency>
@@ -43,6 +44,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>${awaitility.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

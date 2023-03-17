@@ -27,6 +27,7 @@ public class StackControllerTests {
 
     @Test
     public void push_onNormalWorkflow_returns200() throws Exception {
+        // Act and assert
         mvc.perform(post("/stack/push")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"value\":\"test\"}"))
                 .andExpect(status().isOk());
@@ -34,6 +35,7 @@ public class StackControllerTests {
 
     @Test
     public void push_withEmptyItemValue_returns400() throws Exception {
+        // Act and assert
         mvc.perform(post("/stack/push")
                         .contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest())
@@ -44,10 +46,12 @@ public class StackControllerTests {
 
     @Test
     public void pop_onNormalWorkflow_returns200() throws Exception {
+        // Arrange
         mvc.perform(post("/stack/push")
                         .contentType(MediaType.APPLICATION_JSON).content("{\"value\":\"test\"}"))
                 .andExpect(status().isOk());
 
+        // Act and assert
         mvc.perform(get("/stack/pop"))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()

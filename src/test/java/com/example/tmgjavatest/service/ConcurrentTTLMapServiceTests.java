@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,6 +25,7 @@ public class ConcurrentTTLMapServiceTests {
     public void classConcurrentTTLMapService_inTheNormalWorkflow_shouldWorkAsExpected()
             throws InterruptedException {
         //Arrange
+        Long timeToLiveInSeconds = 2L;
         String johnName = "John";
         String larryName = "Larry";
         String nameKey = "name";
@@ -31,16 +35,18 @@ public class ConcurrentTTLMapServiceTests {
         mapService.put(nameKey, johnName, null);
         String johnNameValue = mapService.get(nameKey);
         String emptyAgeValue = mapService.get(ageKey);
-        mapService.put(nameKey, larryName, 2L);
+        mapService.put(nameKey, larryName, timeToLiveInSeconds);
         String larryNameValue = mapService.get(nameKey);
-        Thread.sleep(2000);
-        String emptyNameValue = mapService.get(nameKey);
 
         // Assert
-        assertEquals(johnName, johnNameValue);
-        assertEquals(TTLMapService.DEFAULT_VALUE, emptyAgeValue);
-        assertEquals(larryName, larryNameValue);
-        assertEquals(TTLMapService.DEFAULT_VALUE, emptyNameValue);
+        await().atMost(Duration.ofSeconds(timeToLiveInSeconds + 1L)).until(() -> {
+            String emptyNameValue = mapService.get(nameKey);
+
+            return johnName.equals(johnNameValue) &&
+                    TTLMapService.DEFAULT_VALUE.equals(emptyAgeValue) &&
+                    larryName.equals(larryNameValue) &&
+                    TTLMapService.DEFAULT_VALUE.equals(emptyNameValue);
+        });
     }
 
     @Test
@@ -68,13 +74,19 @@ public class ConcurrentTTLMapServiceTests {
 
     @Test
     public void get_withExpiredKey_shouldReturnDefaultValue() throws InterruptedException {
+        // Arrange
+        Long timeToLiveInSeconds = 2L;
+        String key = "test";
+        String value = "value";
+
         // Act
-        mapService.put("test", "value", 2L);
-        Thread.sleep(2000);
-        String value = mapService.get("test");
+        mapService.put(key, value, timeToLiveInSeconds);
 
         // Assert
-        assertEquals(TTLMapService.DEFAULT_VALUE, value);
+        await().atMost(Duration.ofSeconds(timeToLiveInSeconds + 1L)).until(() -> {
+            String retrievedValue = mapService.get(key);
+            return TTLMapService.DEFAULT_VALUE.equals(retrievedValue);
+        });
     }
 
     @Test
