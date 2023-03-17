@@ -1,11 +1,14 @@
 package com.example.tmgjavatest.service;
 
+import com.example.tmgjavatest.TestType;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag(TestType.UNIT_TEST)
 public class ConcurrentTTLMapServiceTests {
 
     private TTLMapService mapService;

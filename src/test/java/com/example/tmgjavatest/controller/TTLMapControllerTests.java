@@ -1,6 +1,8 @@
 package com.example.tmgjavatest.controller;
 
+import com.example.tmgjavatest.TestType;
 import com.example.tmgjavatest.TmgJavaTestApplication;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,10 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
         classes = TmgJavaTestApplication.class)
 @AutoConfigureMockMvc
+@Tag(TestType.INTEGRATION_TEST)
 public class TTLMapControllerTests {
     @Autowired
     private MockMvc mvc;
-
 
     @Test
     public void put_onNormalWorkflow_returns200() throws Exception {

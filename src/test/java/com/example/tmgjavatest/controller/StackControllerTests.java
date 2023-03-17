@@ -1,8 +1,9 @@
 package com.example.tmgjavatest.controller;
 
+import com.example.tmgjavatest.TestType;
 import com.example.tmgjavatest.TmgJavaTestApplication;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
         classes = TmgJavaTestApplication.class)
 @AutoConfigureMockMvc
+@Tag(TestType.INTEGRATION_TEST)
 public class StackControllerTests {
     @Autowired
     private MockMvc mvc;
