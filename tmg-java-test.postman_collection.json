@@ -12,7 +12,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "\"test\"",
+					"raw": "{\n    \"item\": \"Hello\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -55,8 +55,28 @@
 		{
 			"name": "Put in map",
 			"request": {
-				"method": "GET",
-				"header": []
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"key\": \"name\",\n    \"value\": \"John\",\n    \"timeToLiveInSeconds\": 5\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BaseURL}}:{{Port}}/map/put",
+					"host": [
+						"{{BaseURL}}"
+					],
+					"port": "{{Port}}",
+					"path": [
+						"map",
+						"put"
+					]
+				}
 			},
 			"response": []
 		},
