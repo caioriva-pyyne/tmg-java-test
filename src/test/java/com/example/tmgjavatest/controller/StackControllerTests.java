@@ -26,40 +26,37 @@ public class StackControllerTests {
     private MockMvc mvc;
 
     @Test
-    public void push_onNormalWorkflow_returns200() throws Exception {
-        // Act and assert
-        mvc.perform(post("/stack/push")
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"value\":\"test\"}"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void push_withEmptyItemValue_returns400() throws Exception {
+    public void push_withoutItem_returns400() throws Exception {
         // Act and assert
         mvc.perform(post("/stack/push")
                         .contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.jsonPath("errors[0]")
-                        .value("A value for an item is required to push"));
+                        .value("An item is required to be pushed"));
     }
 
     @Test
-    public void pop_onNormalWorkflow_returns200() throws Exception {
+    public void pop_withFilledStack_returns200() throws Exception {
         // Arrange
         mvc.perform(post("/stack/push")
-                        .contentType(MediaType.APPLICATION_JSON).content("{\"value\":\"test\"}"))
-                .andExpect(status().isOk());
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"item\":\"test\"}"))
+                .andExpect(status().isNoContent());
 
         // Act and assert
         mvc.perform(get("/stack/pop"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("test"));
+                .andExpect(MockMvcResultMatchers.jsonPath("data.item").value("test"));
+    }
 
-        mvc.perform(get("/stack/pop"))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .string(""));
+    @Test
+    public void pop_withEmptyStack_returns404() throws Exception {
+        // Act and assert
+        mvc.perform(get("/stack/pop")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("errors[0]")
+                        .value("No item could be returned because the stack is empty"));
     }
 }

@@ -2,7 +2,7 @@ package com.example.tmgjavatest.controller;
 
 import com.example.tmgjavatest.TestType;
 import com.example.tmgjavatest.TmgJavaTestApplication;
-import org.junit.jupiter.api.Assertions;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -38,21 +38,21 @@ public class TTLMapControllerTests {
     private MockMvc mvc;
 
     @Test
-    public void put_onNormalWorkflow_returns200() throws Exception {
+    public void put_onNormalWorkflow_returns204() throws Exception {
         // Act and assert
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"key\":\"key\", \"value\":\"value\"}"))
-                .andExpect(status().isOk());
+                        .content("{\"key\":\"key1\", \"value\":\"value1\"}"))
+                .andExpect(status().isNoContent());
     }
 
     @Test
-    public void put_onNormalWorkflow_shouldAcceptTTLAndReturn200() throws Exception {
+    public void put_onNormalWorkflow_shouldAcceptTTLAndReturn204() throws Exception {
         // Act and assert
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.format("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": %s}", TEST_TTL)))
-                .andExpect(status().isOk());
+                        .content(String.format("{\"key\":\"key2\", \"value\":\"value2\", \"timeToLiveInSeconds\": %s}", TEST_TTL)))
+                .andExpect(status().isNoContent());
     }
 
     @ParameterizedTest
@@ -74,29 +74,34 @@ public class TTLMapControllerTests {
         // Arrange
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"key\":\"key\", \"value\":\"value\"}"))
-                .andExpect(status().isOk());
+                        .content("{\"key\":\"key3\", \"value\":\"value3\"}"))
+                .andExpect(status().isNoContent());
 
         // Act and assert
-        mvc.perform(get("/map/get?key=key"))
+        mvc.perform(get("/map/get?key=key3"))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content()
-                        .string("value"));
+                .andExpect(MockMvcResultMatchers.jsonPath("data.key").value("key3"))
+                .andExpect(MockMvcResultMatchers.jsonPath("data.value").value("value3"));
     }
 
     @Test
-    public void get_onNormalWorkflowWithExpiredKey_returns200() throws Exception {
+    public void get_onNormalWorkflowWithExpiredKey_returns404() throws Exception {
         // Arrange
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(String.format("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": %s}", TEST_TTL)))
-                .andExpect(status().isOk());
+                        .content(String.format("{\"key\":\"key4\", \"value\":\"value4\", \"timeToLiveInSeconds\": %s}", TEST_TTL)))
+                .andExpect(status().isNoContent());
 
         // Act and assert
-        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() -> Assertions.assertDoesNotThrow(
-                () -> mvc.perform(get("/map/get?key=key"))
-                        .andExpect(status().isOk())
-                        .andReturn().getResponse().getContentAsString().isEmpty()));
+        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() ->
+                {
+                      var mvcResult = mvc.perform(get("/map/get?key=key"))
+                            .andExpect(status().isNotFound())
+                            .andReturn();
+                    var json = new JSONObject(mvcResult.getResponse().getContentAsString());
+
+                    return "No value found for the specified key".equals(json.getJSONArray("errors").getString(0));
+                });
     }
 
     @Test
@@ -113,10 +118,10 @@ public class TTLMapControllerTests {
 
     private static Stream<Arguments> keyValueSource() {
         return Stream.of(
-                arguments("{\"key\":\"\", \"value\":\"value\"}", "A key for a key-value pair is required to put"),
-                arguments("{\"key\":\"key\", \"value\":\"\"}", "A value for a key-value pair is required to put"),
-                arguments("{\"value\":\"value\"}", "A key for a key-value pair is required to put"),
-                arguments("{\"key\":\"key\"}", "A value for a key-value pair is required to put")
+                arguments("{\"key\":\"\", \"value\":\"value5\"}", "A key for a key-value pair is required to put"),
+                arguments("{\"key\":\"key6\", \"value\":\"\"}", "A value for a key-value pair is required to put"),
+                arguments("{\"value\":\"value7\"}", "A key for a key-value pair is required to put"),
+                arguments("{\"key\":\"key8\"}", "A value for a key-value pair is required to put")
 
         );
     }

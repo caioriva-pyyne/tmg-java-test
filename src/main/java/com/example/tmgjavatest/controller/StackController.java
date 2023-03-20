@@ -1,6 +1,8 @@
 package com.example.tmgjavatest.controller;
 
-import com.example.tmgjavatest.model.dto.StackItem;
+import com.example.tmgjavatest.exception.EmptyStackException;
+import com.example.tmgjavatest.model.dto.request.StackRequest;
+import com.example.tmgjavatest.model.dto.response.StackResponse;
 import com.example.tmgjavatest.service.StackService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("stack")
+@RequestMapping(value = "stack", produces = "application/json")
 public class StackController {
     private final StackService stackService;
 
@@ -23,13 +25,17 @@ public class StackController {
     }
 
     @PostMapping("/push")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void push(@RequestBody @Valid StackItem item) {
-        stackService.push(item.getValue());
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void push(@RequestBody @Valid StackRequest request) {
+        stackService.push(request.getItem());
     }
 
-    @GetMapping(value = "/pop", produces = "application/json")
-    public String pop() {
-        return stackService.pop();
+    @GetMapping(value = "/pop")
+    @ResponseStatus(value = HttpStatus.OK)
+    public StackResponse pop() {
+        String item = stackService.pop();
+        if(item == null) throw new EmptyStackException();
+
+        return new StackResponse(item);
     }
 }

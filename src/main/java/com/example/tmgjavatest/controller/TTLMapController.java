@@ -1,6 +1,8 @@
 package com.example.tmgjavatest.controller;
 
-import com.example.tmgjavatest.model.dto.TTLMapKVPair;
+import com.example.tmgjavatest.exception.NoKeyValuePairException;
+import com.example.tmgjavatest.model.dto.request.TTLMapRequest;
+import com.example.tmgjavatest.model.dto.response.TTLMapResponse;
 import com.example.tmgjavatest.service.TTLMapService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -16,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Validated
 @RestController
 @RequestMapping(value = "map", produces = "application/json")
-@Validated
 public class TTLMapController {
 
     private static final String KEY_REQUEST_PARAM_VALIDATION_MESSAGE =
@@ -31,17 +33,22 @@ public class TTLMapController {
     }
 
     @PutMapping("/put")
-    @ResponseStatus(value = HttpStatus.OK)
-    public void put(@RequestBody @Valid TTLMapKVPair pair) {
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void put(@RequestBody @Valid TTLMapRequest pair) {
         mapService.put(pair.getKey(), pair.getValue(), pair.getTimeToLiveInSeconds());
     }
 
     @GetMapping(value = "/get")
-    public String get(@NotEmpty(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) @RequestParam String key) {
-        return mapService.get(key);
+    @ResponseStatus(value = HttpStatus.OK)
+    public TTLMapResponse get(@NotEmpty(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) @RequestParam String key) {
+        String value = mapService.get(key);
+        if(value == null) throw new NoKeyValuePairException();
+
+        return new TTLMapResponse(key, value);
     }
 
     @DeleteMapping(value = "/remove")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void remove(@NotEmpty(message = KEY_REQUEST_PARAM_VALIDATION_MESSAGE) @RequestParam String key) {
         mapService.remove(key);
     }
