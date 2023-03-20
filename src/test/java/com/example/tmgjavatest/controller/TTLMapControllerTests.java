@@ -31,6 +31,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Tag(TestType.INTEGRATION_TEST)
 public class TTLMapControllerTests {
+    private static final Long TEST_TTL = 1L;
+    private static final Long CLEANER_EXECUTION_MAX_WAIT_TIME = 5L;
+
     @Autowired
     private MockMvc mvc;
 
@@ -48,7 +51,7 @@ public class TTLMapControllerTests {
         // Act and assert
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": 1}"))
+                        .content(String.format("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": %s}", TEST_TTL)))
                 .andExpect(status().isOk());
     }
 
@@ -86,11 +89,11 @@ public class TTLMapControllerTests {
         // Arrange
         mvc.perform(put("/map/put")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": 1}"))
+                        .content(String.format("{\"key\":\"key\", \"value\":\"value\", \"timeToLiveInSeconds\": %s}", TEST_TTL)))
                 .andExpect(status().isOk());
 
         // Act and assert
-        await().atMost(Duration.ofSeconds(2L)).until(() -> Assertions.assertDoesNotThrow(
+        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() -> Assertions.assertDoesNotThrow(
                 () -> mvc.perform(get("/map/get?key=key"))
                         .andExpect(status().isOk())
                         .andReturn().getResponse().getContentAsString().isEmpty()));
