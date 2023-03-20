@@ -19,11 +19,11 @@ public class ConcurrentTTLMapServiceTests {
     private static final Long TEST_TTL = 1L;
     private static final Long CLEANER_EXECUTION_MAX_WAIT_TIME = 5L;
 
-    private ConcurrentTTLMapService mapService;
+    private ConcurrentTTLMapService<String, String> mapService;
 
     @BeforeEach
     public void setUp() {
-        mapService = new ConcurrentTTLMapService();
+        mapService = new ConcurrentTTLMapService<>();
     }
 
     @AfterEach
@@ -54,6 +54,34 @@ public class ConcurrentTTLMapServiceTests {
                     nullAgeValue == null &&
                     larryName.equals(larryNameValue) &&
                     nullNameValue == null;
+        });
+    }
+
+    @Test
+    public void classConcurrentTTLMapService_withArbitraryKeyAndValueType_shouldWorkAsExpected() {
+        //Arrange
+        var value1 = new Object();
+        var value2 = new Object();
+        var key1 = new Object();
+        var key2 = new Object();
+
+        TTLMapService<Object, Object> agnosticTTLMapService = new ConcurrentTTLMapService<>();
+
+        // Act
+        agnosticTTLMapService.put(key1, value1, null);
+        Object retrievedValue1 = agnosticTTLMapService.get(key1);
+        Object retrievedNull = agnosticTTLMapService.get(key2);
+        agnosticTTLMapService.put(key1, value2, TEST_TTL);
+        Object retrievedValue2 = agnosticTTLMapService.get(key1);
+
+        // Assert
+        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() -> {
+            Object retrievedNull2 = agnosticTTLMapService.get(key1);
+
+            return value1.equals(retrievedValue1) &&
+                    retrievedNull == null &&
+                    value2.equals(retrievedValue2) &&
+                    retrievedNull2 == null;
         });
     }
 

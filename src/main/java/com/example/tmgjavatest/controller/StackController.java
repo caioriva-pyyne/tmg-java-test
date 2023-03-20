@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "stack", produces = "application/json")
 public class StackController {
-    private final StackService stackService;
+    private final StackService<String> stackService;
 
     @Autowired
-    public StackController(StackService stackService) {
+    public StackController(StackService<String> stackService) {
         this.stackService = stackService;
     }
 

@@ -1,9 +1,9 @@
 package com.example.tmgjavatest.service;
 
-public interface TTLMapService {
-    void put(String key, String value, Long timeToLiveInSeconds);
+public interface TTLMapService<K, V> {
+    void put(K key, V value, Long timeToLiveInSeconds);
 
-    String get(String key);
+    V get(K key);
 
-    void remove(String key);
+    void remove(K key);
 }

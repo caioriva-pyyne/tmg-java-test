@@ -22,13 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "map", produces = "application/json")
 public class TTLMapController {
-
     private static final String KEY_REQUEST_PARAM_VALIDATION_MESSAGE =
             "'key' request parameter should be specified and it must not be empty";
-    private final TTLMapService mapService;
+    private final TTLMapService<String, String> mapService;
 
     @Autowired
-    public TTLMapController(TTLMapService mapService) {
+    public TTLMapController(TTLMapService<String, String> mapService) {
         this.mapService = mapService;
     }
 

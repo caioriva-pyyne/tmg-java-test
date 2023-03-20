@@ -4,24 +4,31 @@ import com.example.tmgjavatest.TestType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 @Tag(TestType.UNIT_TEST)
 public class ConcurrentStackServiceTests {
-    private StackService stackService;
+    private StackService<String> stackService;
 
     @BeforeEach
     public void setUp() {
-        stackService = new ConcurrentStackService();
+        stackService = new ConcurrentStackService<>();
     }
 
     @Test
@@ -45,6 +52,29 @@ public class ConcurrentStackServiceTests {
         assertEquals(helloValue, thirdPoppedValue);
         assertEquals(null, fourthPoppedValue);
 
+    }
+
+    @Test
+    public void classConcurrentStackService_withArbitraryItemType_shouldWorkAsExpected(){
+        Object firstItem = new Object();
+        Object secondItem = new Object();
+        Object thirdItem = new Object();
+
+        StackService<Object> agnosticStackService = new ConcurrentStackService<>();
+        // Act
+        agnosticStackService.push(firstItem);
+        agnosticStackService.push(secondItem);
+        Object firstPoppedValue = agnosticStackService.pop();
+        agnosticStackService.push(thirdItem);
+        Object secondPoppedValue = agnosticStackService.pop();
+        Object thirdPoppedValue = agnosticStackService.pop();
+        Object fourthPoppedValue = agnosticStackService.pop();
+
+        // Assert
+        assertEquals(secondItem, firstPoppedValue);
+        assertEquals(thirdItem, secondPoppedValue);
+        assertEquals(firstItem, thirdPoppedValue);
+        assertEquals(null, fourthPoppedValue);
     }
 
     @Test

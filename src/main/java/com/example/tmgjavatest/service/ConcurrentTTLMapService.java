@@ -11,13 +11,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class ConcurrentTTLMapService implements TTLMapService {
+public class ConcurrentTTLMapService<K, V> implements TTLMapService<K, V> {
     private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
     private static final int CLEANER_EXECUTOR_PERIOD = 100;
 
     private final ScheduledExecutorService executor;
-    private final ConcurrentMap<String, Long> ttlMap;
-    private final ConcurrentMap<String, String> dataMap;
+    private final ConcurrentMap<K, Long> ttlMap;
+    private final ConcurrentMap<K, V> dataMap;
 
     public ConcurrentTTLMapService() {
         ttlMap = new ConcurrentHashMap<>();
@@ -34,7 +34,7 @@ public class ConcurrentTTLMapService implements TTLMapService {
     }
 
     @Override
-    public void put(String key, String value, Long timeToLiveInSeconds) {
+    public void put(K key, V value, Long timeToLiveInSeconds) {
         dataMap.put(key, value);
 
         if (timeToLiveInSeconds != null)
@@ -42,21 +42,21 @@ public class ConcurrentTTLMapService implements TTLMapService {
     }
 
     @Override
-    public String get(String key) {
+    public V get(K key) {
         return dataMap.get(key);
     }
 
     @Override
-    public void remove(String key) {
+    public void remove(K key) {
         dataMap.remove(key);
         ttlMap.remove(key);
     }
 
-    static class Cleaner implements Runnable {
-        private final ConcurrentMap<String, Long> ttlMap;
-        private final ConcurrentMap<String, String> dataMap;
+    class Cleaner implements Runnable {
+        private final ConcurrentMap<K, Long> ttlMap;
+        private final ConcurrentMap<K, V> dataMap;
 
-        Cleaner(ConcurrentMap<String, Long> ttlMap, ConcurrentMap<String, String> dataMap) {
+        Cleaner(ConcurrentMap<K, Long> ttlMap, ConcurrentMap<K, V> dataMap) {
             this.ttlMap = ttlMap;
             this.dataMap = dataMap;
         }
