@@ -43,7 +43,7 @@ public class ConcurrentStackServiceTests {
         assertEquals(worldValue, firstPoppedValue);
         assertEquals(againValue, secondPoppedValue);
         assertEquals(helloValue, thirdPoppedValue);
-        assertEquals(StackService.EMPTY_STACK_MSG, fourthPoppedValue);
+        assertEquals(null, fourthPoppedValue);
 
     }
 
@@ -53,33 +53,37 @@ public class ConcurrentStackServiceTests {
         // Arrange
         var testValueA = "ut-A";
         var testValueB = "ut-B";
-
         ExecutorService executorService = Executors.newFixedThreadPool(3);
 
-        Runnable pushAValueTask = () -> stackService.push(testValueA);
-        Runnable pushBValueTask = () -> stackService.push(testValueB);
-        Callable<String> firstPopTask = () -> stackService.pop();
-        Callable<String> secondPopTask = () -> stackService.pop();
+        try {
+            Runnable pushAValueTask = () -> stackService.push(testValueA);
+            Runnable pushBValueTask = () -> stackService.push(testValueB);
+            Callable<String> firstPopTask = () -> stackService.pop();
+            Callable<String> secondPopTask = () -> stackService.pop();
 
-        // Act
-        executorService.submit(pushAValueTask);
-        executorService.submit(pushBValueTask);
-        Future<String> firstPoppedValue = executorService.submit(firstPopTask);
-        Future<String> secondPoppedValue = executorService.submit(secondPopTask);
+            // Act
+            executorService.submit(pushAValueTask);
+            executorService.submit(pushBValueTask);
+            Future<String> firstPoppedValue = executorService.submit(firstPopTask);
+            Future<String> secondPoppedValue = executorService.submit(secondPopTask);
 
-        // Assert
-        assertTrue(List.of(testValueB, testValueA)
-                .containsAll(List.of(firstPoppedValue.get(), secondPoppedValue.get())));
+            // Assert
+            assertTrue(List.of(testValueB, testValueA)
+                    .containsAll(List.of(firstPoppedValue.get(), secondPoppedValue.get())));
+
+        } finally {
+            executorService.shutdownNow();
+        }
     }
 
     @Test
-    public void pop_withEmptyStack_shouldReturnEmptyStackMessage() {
+    public void pop_withEmptyStack_shouldReturnNull() {
         // Act
         String firstPoppedValue = stackService.pop();
         String secondPoppedValue = stackService.pop();
 
         // Assert
-        assertEquals(StackService.EMPTY_STACK_MSG, firstPoppedValue);
-        assertEquals(StackService.EMPTY_STACK_MSG, secondPoppedValue);
+        assertEquals(null, firstPoppedValue);
+        assertEquals(null, secondPoppedValue);
     }
 }

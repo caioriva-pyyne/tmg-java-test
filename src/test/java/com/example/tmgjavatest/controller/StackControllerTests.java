@@ -56,5 +56,10 @@ public class StackControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.content()
                         .string("test"));
+
+        mvc.perform(get("/stack/pop"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content()
+                        .string(""));
     }
 }

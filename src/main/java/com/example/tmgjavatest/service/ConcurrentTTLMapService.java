@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ConcurrentTTLMapService implements TTLMapService {
-
     private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
     private static final int CLEANER_EXECUTOR_PERIOD = 100;
 
@@ -64,17 +63,17 @@ public class ConcurrentTTLMapService implements TTLMapService {
 
         @Override
         public void run() {
-            if (!ttlMap.isEmpty()) {
-                var now = Instant.now().getEpochSecond();
-                ttlMap.entrySet()
-                        .stream()
-                        .filter(entry -> now > entry.getValue())
-                        .forEach(entry -> {
-                            var key = entry.getKey();
-                            ttlMap.remove(key);
-                            dataMap.remove(key);
-                        });
-            }
+            if (ttlMap.isEmpty()) return;
+
+            var now = Instant.now().getEpochSecond();
+            ttlMap.entrySet()
+                    .stream()
+                    .filter(entry -> now > entry.getValue())
+                    .forEach(entry -> {
+                        var key = entry.getKey();
+                        ttlMap.remove(key);
+                        dataMap.remove(key);
+                    });
         }
     }
 }
