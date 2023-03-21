@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class ConcurrentTTLMapService<K, V> implements TTLMapService<K, V> {
+public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
     private static final int CLEANER_EXECUTOR_PERIOD = 100;
 
@@ -19,7 +19,7 @@ public class ConcurrentTTLMapService<K, V> implements TTLMapService<K, V> {
     private final ConcurrentMap<K, Long> ttlMap;
     private final ConcurrentMap<K, V> dataMap;
 
-    public ConcurrentTTLMapService() {
+    public TTLMapServiceImpl() {
         ttlMap = new ConcurrentHashMap<>();
         dataMap = new ConcurrentHashMap<>();
         executor = Executors.newSingleThreadScheduledExecutor();

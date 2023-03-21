@@ -14,16 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @Tag(TestType.UNIT_TEST)
-public class ConcurrentTTLMapServiceTests {
+public class TTLMapServiceImplTests {
 
     private static final Long TEST_TTL = 1L;
     private static final Long CLEANER_EXECUTION_MAX_WAIT_TIME = 5L;
 
-    private ConcurrentTTLMapService<String, String> mapService;
+    private TTLMapServiceImpl<String, String> mapService;
 
     @BeforeEach
     public void setUp() {
-        mapService = new ConcurrentTTLMapService<>();
+        mapService = new TTLMapServiceImpl<>();
     }
 
     @AfterEach
@@ -65,7 +65,7 @@ public class ConcurrentTTLMapServiceTests {
         var key1 = new Object();
         var key2 = new Object();
 
-        TTLMapService<Object, Object> agnosticTTLMapService = new ConcurrentTTLMapService<>();
+        TTLMapService<Object, Object> agnosticTTLMapService = new TTLMapServiceImpl<>();
 
         // Act
         agnosticTTLMapService.put(key1, value1, null);
