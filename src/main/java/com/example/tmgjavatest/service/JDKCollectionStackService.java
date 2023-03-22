@@ -6,10 +6,10 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Service
-public class ConcurrentJDKStackService<T> implements StackService<T> {
+public class JDKCollectionStackService<T> implements StackService<T> {
     private final ConcurrentLinkedDeque<T> stack;
 
-    public ConcurrentJDKStackService() {
+    public JDKCollectionStackService() {
         this.stack = new ConcurrentLinkedDeque<>();
     }
 
