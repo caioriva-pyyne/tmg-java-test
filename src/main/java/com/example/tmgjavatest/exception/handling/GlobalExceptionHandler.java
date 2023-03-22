@@ -17,6 +17,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Class that handles user and checked exceptions thrown by the application and wrap them into a
+ * standard error response.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

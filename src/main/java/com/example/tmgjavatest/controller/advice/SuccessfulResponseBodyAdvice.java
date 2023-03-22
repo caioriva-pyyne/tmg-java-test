@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+/**
+ * Class that handles successful results from the application and wrap them into a
+ * standard response.
+ */
 @ControllerAdvice
 public class SuccessfulResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     @Override

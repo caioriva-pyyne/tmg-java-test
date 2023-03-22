@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.mock;
@@ -41,57 +40,30 @@ public class TTLMapServiceImplTests {
     public void classConcurrentTTLMapService_inTheNormalWorkflow_shouldWorkAsExpected() {
         //Arrange
         var johnName = "John";
-        var larryName = "Larry";
         var nameKey = "name";
-        var ageKey = "age";
-        Long testExpiredEpoch = Instant.now().minusSeconds(TEST_TTL).getEpochSecond();
-
-        when(timeManagementServiceMock.getEpochAfterDurationInSeconds(TEST_TTL)).thenReturn(testExpiredEpoch);
-        when(timeManagementServiceMock.getCurrentEpoch()).thenReturn(testExpiredEpoch).thenCallRealMethod();
+        mapService.put(nameKey, johnName, null);
 
         // Act
-        mapService.put(nameKey, johnName, null);
         String johnNameValue = mapService.get(nameKey);
-        String nullAgeValue = mapService.get(ageKey);
-        mapService.put(nameKey, larryName, TEST_TTL);
-        String larryNameValue = mapService.get(nameKey);
-        String nullNameValue = mapService.get(nameKey);
 
         // Assert
         assertEquals(johnName, johnNameValue);
-        assertNull(nullAgeValue);
-        assertEquals(larryName, larryNameValue);
-        assertNull(nullNameValue);
     }
 
     @Test
     public void classConcurrentTTLMapService_withArbitraryKeyAndValueType_shouldWorkAsExpected() {
         //Arrange
         var value1 = new Object();
-        var value2 = new Object();
         var key1 = new Object();
-        var key2 = new Object();
-        Long testExpiredEpoch = Instant.now().minusSeconds(TEST_TTL).getEpochSecond();
-
-        when(timeManagementServiceMock.getEpochAfterDurationInSeconds(TEST_TTL)).thenReturn(testExpiredEpoch);
-        when(timeManagementServiceMock.getCurrentEpoch()).thenReturn(testExpiredEpoch).thenCallRealMethod();
 
         TTLMapService<Object, Object> agnosticTTLMapService = new TTLMapServiceImpl<>(timeManagementServiceMock);
 
         // Act
         agnosticTTLMapService.put(key1, value1, null);
-        Object retrievedValue1 = agnosticTTLMapService.get(key1);
-        Object retrievedNull = agnosticTTLMapService.get(key2);
-        agnosticTTLMapService.put(key1, value2, TEST_TTL);
-        Object retrievedValue2 = agnosticTTLMapService.get(key1);
-        Object retrievedNull2 = agnosticTTLMapService.get(key1);
-
+        Object retrieved1 = agnosticTTLMapService.get(key1);
 
         // Assert
-        assertEquals(value1, retrievedValue1);
-        assertNull(retrievedNull);
-        assertEquals(value2, retrievedValue2);
-        assertNull(retrievedNull2);
+        assertEquals(value1, retrieved1);
     }
 
     @Test
@@ -107,18 +79,13 @@ public class TTLMapServiceImplTests {
     }
 
     @Test
-    public void get_withNonexistentKey_shouldReturnNull() {
-        // Act
-        String firstValue = mapService.get("nonexistent1");
-        String secondValue = mapService.get("nonexistent2");
-
-        // Assert
-        assertNull(firstValue);
-        assertNull(secondValue);
+    public void get_withNonexistentKey_shouldThrowNoKeyValuePairException() {
+        // Act and assert
+        assertThrows(NoKeyValuePairException.class, () -> mapService.get("nonexistent1"));
     }
 
     @Test
-    public void get_withExpiredKey_shouldReturnNull() {
+    public void get_withExpiredKey_shouldThrowNoKeyValuePairException() {
         // Arrange
         var key = "test";
         var value = "value";
@@ -130,7 +97,7 @@ public class TTLMapServiceImplTests {
         mapService.put(key, value, TEST_TTL);
 
         // Assert
-        assertNull(mapService.get(key));
+        assertThrows(NoKeyValuePairException.class, () -> mapService.get(key));
     }
 
     @Test

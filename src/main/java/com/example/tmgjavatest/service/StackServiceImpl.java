@@ -1,8 +1,16 @@
 package com.example.tmgjavatest.service;
 
+import com.example.tmgjavatest.exception.EmptyStackException;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+/**
+ * Class that offers basic FILO operations (push and pop).
+ * It uses a doubly linked list implementation with synchronized methods for
+ * thread-safety.
+ *
+ * @param <T> the type of item that the stack can store
+ */
 @Service
 @Primary
 public class StackServiceImpl<T> implements StackService<T> {
@@ -25,8 +33,8 @@ public class StackServiceImpl<T> implements StackService<T> {
     }
 
     @Override
-    public synchronized T pop() {
-        if (head == null) return null;
+    public synchronized T pop() throws EmptyStackException {
+        if (head == null) throw new EmptyStackException();
 
         T item = last.item;
         if (last.previous == null) {

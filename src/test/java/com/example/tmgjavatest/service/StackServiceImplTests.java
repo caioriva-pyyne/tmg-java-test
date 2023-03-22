@@ -1,11 +1,13 @@
 package com.example.tmgjavatest.service;
 
 import com.example.tmgjavatest.TestType;
+import com.example.tmgjavatest.exception.EmptyStackException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Tag(TestType.UNIT_TEST)
 public class StackServiceImplTests {
@@ -29,14 +31,12 @@ public class StackServiceImplTests {
         stackService.push(againValue);
         String secondPoppedValue = stackService.pop();
         String thirdPoppedValue = stackService.pop();
-        String fourthPoppedValue = stackService.pop();
 
         // Assert
         assertEquals(worldValue, firstPoppedValue);
         assertEquals(againValue, secondPoppedValue);
         assertEquals(helloValue, thirdPoppedValue);
-        assertEquals(null, fourthPoppedValue);
-
+        assertThrows(EmptyStackException.class, () -> stackService.pop());
     }
 
     @Test
@@ -53,24 +53,17 @@ public class StackServiceImplTests {
         agnosticStackService.push(thirdItem);
         Object secondPoppedValue = agnosticStackService.pop();
         Object thirdPoppedValue = agnosticStackService.pop();
-        Object fourthPoppedValue = agnosticStackService.pop();
 
         // Assert
         assertEquals(secondItem, firstPoppedValue);
         assertEquals(thirdItem, secondPoppedValue);
         assertEquals(firstItem, thirdPoppedValue);
-        assertEquals(null, fourthPoppedValue);
     }
 
     @Test
-    public void pop_withEmptyStack_shouldReturnNull() {
-        // Act
-        String firstPoppedValue = stackService.pop();
-        String secondPoppedValue = stackService.pop();
-
-        // Assert
-        assertEquals(null, firstPoppedValue);
-        assertEquals(null, secondPoppedValue);
+    public void pop_withEmptyStack_shouldThrowEmptyStackException() {
+        // Act and assert
+        assertThrows(EmptyStackException.class, () -> stackService.pop());
     }
 
     protected <T> StackService<T> getStackServiceInstance() {

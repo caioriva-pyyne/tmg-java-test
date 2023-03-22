@@ -1,10 +1,17 @@
 package com.example.tmgjavatest.service;
 
+import com.example.tmgjavatest.exception.EmptyStackException;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+/**
+ * Class that offers basic FILO operations (push and pop).
+ * It uses a ConcurrentLinkedDeque to handle FILO operations and thread-safety.
+ *
+ * @param <T> the type of item that the stack can store
+ */
 @Service
 public class JDKCollectionStackService<T> implements StackService<T> {
     private final ConcurrentLinkedDeque<T> stack;
@@ -19,11 +26,11 @@ public class JDKCollectionStackService<T> implements StackService<T> {
     }
 
     @Override
-    public T pop() {
+    public T pop() throws EmptyStackException {
         try {
             return stack.removeLast();
         } catch (NoSuchElementException e) {
-            return null;
+            throw new EmptyStackException();
         }
     }
 }

@@ -11,11 +11,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Class that offers basic Map operations (put, get and remove) with configurable time-to-live for each entry.
+ * It uses the ConcurrentHashMap collection to store entries and to handle concurrency.
+ *
+ * @param <K> the type of the key that the map can store
+ * @param <V> the type of the value that the map can store
+ */
 @Service
 public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
-
-    // Execution period of 900ms so the cleaner executor always runs in between expiration windows (minimal value for TTL is 1s)
     private static final int CLEANER_EXECUTOR_PERIOD = 900;
 
     private final ScheduledExecutorService executor;
@@ -47,19 +52,21 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     }
 
     @Override
-    public V get(K key) {
+    public V get(K key) throws NoKeyValuePairException {
         Long expiration = ttlMap.get(key);
-        if(expiration != null && timeManagementService.getCurrentEpoch() > expiration) {
+        if(!dataMap.containsKey(key)
+                || (expiration != null && timeManagementService.getCurrentEpoch() > expiration)) {
             ttlMap.remove(key);
             dataMap.remove(key);
-            return null;
+
+            throw new NoKeyValuePairException();
         }
 
         return dataMap.get(key);
     }
 
     @Override
-    public void remove(K key) {
+    public void remove(K key) throws NoKeyValuePairException {
         V value = dataMap.remove(key);
         if (value == null) throw new NoKeyValuePairException();
         ttlMap.remove(key);
