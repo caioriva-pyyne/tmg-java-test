@@ -7,8 +7,8 @@ import java.time.Instant;
 @Service
 public class TimeManagementServiceImpl implements TimeManagementService {
     @Override
-    public Long getEpochAfterDurationInSeconds(Long seconds) {
-        return Instant.now().plusSeconds(seconds).getEpochSecond();
+    public Long getEpochAfterDurationInSeconds(Long durationInSeconds) {
+        return Instant.now().plusSeconds(durationInSeconds).getEpochSecond();
     }
 
     @Override

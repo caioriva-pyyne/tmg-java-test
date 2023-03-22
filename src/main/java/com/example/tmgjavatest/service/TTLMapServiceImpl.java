@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
 
-    // Execution period of 900ms so the cleaner executor always runs in between expiration windows (minimal value 1s)
+    // Execution period of 900ms so the cleaner executor always runs in between expiration windows (minimal value for TTL is 1s)
     private static final int CLEANER_EXECUTOR_PERIOD = 900;
 
     private final ScheduledExecutorService executor;
@@ -29,7 +29,7 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
         ttlMap = new ConcurrentHashMap<>();
         dataMap = new ConcurrentHashMap<>();
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(new Cleaner(ttlMap, dataMap),
+        executor.scheduleAtFixedRate(new Cleaner(),
                 CLEANER_EXECUTOR_INITIAL_DELAY, CLEANER_EXECUTOR_PERIOD, TimeUnit.MILLISECONDS);
     }
 
@@ -66,14 +66,6 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     }
 
     class Cleaner implements Runnable {
-        private final ConcurrentMap<K, Long> ttlMap;
-        private final ConcurrentMap<K, V> dataMap;
-
-        Cleaner(ConcurrentMap<K, Long> ttlMap, ConcurrentMap<K, V> dataMap) {
-            this.ttlMap = ttlMap;
-            this.dataMap = dataMap;
-        }
-
         @Override
         public void run() {
             if (ttlMap.isEmpty()) return;
