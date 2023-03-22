@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -120,6 +121,30 @@ public class TTLMapControllerTests {
                 .andExpect(MockMvcResultMatchers
                         .jsonPath("errors[0]")
                         .value("'key' request parameter should be specified and it must not be empty"));
+    }
+
+    @Test
+    public void remove_withEmptyKey_returns400() throws Exception {
+        // Act and assert
+        mvc.perform(delete("/map/remove?key=")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("errors[0]")
+                        .value("'key' request parameter should be specified and it must not be empty"));
+    }
+
+    @Test
+    public void remove_withNotFoundKey_returns404() throws Exception {
+        // Act and assert
+        mvc.perform(delete("/map/remove?key=nonexistentKey")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers
+                        .jsonPath("errors[0]")
+                        .value("No value found for the specified key"));
     }
 
     private static Stream<Arguments> keyValueSource() {

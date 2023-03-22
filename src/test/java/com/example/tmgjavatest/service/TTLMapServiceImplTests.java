@@ -1,6 +1,7 @@
 package com.example.tmgjavatest.service;
 
 import com.example.tmgjavatest.TestType;
+import com.example.tmgjavatest.exception.NoKeyValuePairException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -8,9 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -133,8 +134,8 @@ public class TTLMapServiceImplTests {
     }
 
     @Test
-    public void remove_withNonexistentKey_shouldNotFail() {
+    public void remove_withNonexistentKey_shouldThrowNoKeyValuePairException() {
         // Act and assert
-        assertDoesNotThrow(() -> mapService.remove("nonexistent1"));
+        assertThrows(NoKeyValuePairException.class, () -> mapService.remove("nonexistent1"));
     }
 }

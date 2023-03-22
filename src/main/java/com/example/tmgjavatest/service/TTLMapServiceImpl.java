@@ -1,5 +1,6 @@
 package com.example.tmgjavatest.service;
 
+import com.example.tmgjavatest.exception.NoKeyValuePairException;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
-    private static final int CLEANER_EXECUTOR_PERIOD = 100;
+
+    // Execution period of 900ms so the cleaner executor always runs in between expiration windows (minimal value 1s)
+    private static final int CLEANER_EXECUTOR_PERIOD = 900;
 
     private final ScheduledExecutorService executor;
     private final ConcurrentMap<K, Long> ttlMap;
@@ -57,7 +60,8 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
 
     @Override
     public void remove(K key) {
-        dataMap.remove(key);
+        V value = dataMap.remove(key);
+        if (value == null) throw new NoKeyValuePairException();
         ttlMap.remove(key);
     }
 
