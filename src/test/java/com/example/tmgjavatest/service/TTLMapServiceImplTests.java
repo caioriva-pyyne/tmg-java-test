@@ -6,24 +6,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import java.time.Duration;
+import java.time.Instant;
 
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Tag(TestType.UNIT_TEST)
 public class TTLMapServiceImplTests {
-
     private static final Long TEST_TTL = 1L;
-    private static final Long CLEANER_EXECUTION_MAX_WAIT_TIME = 5L;
 
     private TTLMapServiceImpl<String, String> mapService;
 
+    private TimeManagementService timeManagementServiceMock;
+
     @BeforeEach
     public void setUp() {
-        mapService = new TTLMapServiceImpl<>();
+        timeManagementServiceMock = mock(TimeManagementServiceImpl.class);
+        when(timeManagementServiceMock.getCurrentEpoch()).thenCallRealMethod();
+        when(timeManagementServiceMock.getEpochAfterDurationInSeconds(anyLong())).thenCallRealMethod();
+        mapService = new TTLMapServiceImpl<>(timeManagementServiceMock);
     }
 
     @AfterEach
@@ -38,6 +43,10 @@ public class TTLMapServiceImplTests {
         var larryName = "Larry";
         var nameKey = "name";
         var ageKey = "age";
+        Long testExpiredEpoch = Instant.now().minusSeconds(TEST_TTL).getEpochSecond();
+
+        when(timeManagementServiceMock.getEpochAfterDurationInSeconds(TEST_TTL)).thenReturn(testExpiredEpoch);
+        when(timeManagementServiceMock.getCurrentEpoch()).thenReturn(testExpiredEpoch).thenCallRealMethod();
 
         // Act
         mapService.put(nameKey, johnName, null);
@@ -45,16 +54,13 @@ public class TTLMapServiceImplTests {
         String nullAgeValue = mapService.get(ageKey);
         mapService.put(nameKey, larryName, TEST_TTL);
         String larryNameValue = mapService.get(nameKey);
+        String nullNameValue = mapService.get(nameKey);
 
         // Assert
-        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() -> {
-            String nullNameValue = mapService.get(nameKey);
-
-            return johnName.equals(johnNameValue) &&
-                    nullAgeValue == null &&
-                    larryName.equals(larryNameValue) &&
-                    nullNameValue == null;
-        });
+        assertEquals(johnName, johnNameValue);
+        assertNull(nullAgeValue);
+        assertEquals(larryName, larryNameValue);
+        assertNull(nullNameValue);
     }
 
     @Test
@@ -64,8 +70,12 @@ public class TTLMapServiceImplTests {
         var value2 = new Object();
         var key1 = new Object();
         var key2 = new Object();
+        Long testExpiredEpoch = Instant.now().minusSeconds(TEST_TTL).getEpochSecond();
 
-        TTLMapService<Object, Object> agnosticTTLMapService = new TTLMapServiceImpl<>();
+        when(timeManagementServiceMock.getEpochAfterDurationInSeconds(TEST_TTL)).thenReturn(testExpiredEpoch);
+        when(timeManagementServiceMock.getCurrentEpoch()).thenReturn(testExpiredEpoch).thenCallRealMethod();
+
+        TTLMapService<Object, Object> agnosticTTLMapService = new TTLMapServiceImpl<>(timeManagementServiceMock);
 
         // Act
         agnosticTTLMapService.put(key1, value1, null);
@@ -73,16 +83,14 @@ public class TTLMapServiceImplTests {
         Object retrievedNull = agnosticTTLMapService.get(key2);
         agnosticTTLMapService.put(key1, value2, TEST_TTL);
         Object retrievedValue2 = agnosticTTLMapService.get(key1);
+        Object retrievedNull2 = agnosticTTLMapService.get(key1);
+
 
         // Assert
-        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() -> {
-            Object retrievedNull2 = agnosticTTLMapService.get(key1);
-
-            return value1.equals(retrievedValue1) &&
-                    retrievedNull == null &&
-                    value2.equals(retrievedValue2) &&
-                    retrievedNull2 == null;
-        });
+        assertEquals(value1, retrievedValue1);
+        assertNull(retrievedNull);
+        assertEquals(value2, retrievedValue2);
+        assertNull(retrievedNull2);
     }
 
     @Test
@@ -114,11 +122,14 @@ public class TTLMapServiceImplTests {
         var key = "test";
         var value = "value";
 
+        when(timeManagementServiceMock.getEpochAfterDurationInSeconds(TEST_TTL))
+                .thenReturn(Instant.now().minusSeconds(TEST_TTL).getEpochSecond());
+
         // Act
         mapService.put(key, value, TEST_TTL);
 
         // Assert
-        await().atMost(Duration.ofSeconds(CLEANER_EXECUTION_MAX_WAIT_TIME)).until(() -> mapService.get(key) == null);
+        assertNull(mapService.get(key));
     }
 
     @Test

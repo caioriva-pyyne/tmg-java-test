@@ -1,9 +1,9 @@
 package com.example.tmgjavatest.service;
 
 import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executors;
@@ -18,12 +18,14 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
     private final ScheduledExecutorService executor;
     private final ConcurrentMap<K, Long> ttlMap;
     private final ConcurrentMap<K, V> dataMap;
+    private final TimeManagementService timeManagementService;
 
-    public TTLMapServiceImpl() {
+    @Autowired
+    public TTLMapServiceImpl(TimeManagementService timeManagementService) {
+        this.timeManagementService = timeManagementService;
         ttlMap = new ConcurrentHashMap<>();
         dataMap = new ConcurrentHashMap<>();
         executor = Executors.newSingleThreadScheduledExecutor();
-
         executor.scheduleAtFixedRate(new Cleaner(ttlMap, dataMap),
                 CLEANER_EXECUTOR_INITIAL_DELAY, CLEANER_EXECUTOR_PERIOD, TimeUnit.MILLISECONDS);
     }
@@ -38,11 +40,18 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
         dataMap.put(key, value);
 
         if (timeToLiveInSeconds != null)
-            ttlMap.put(key, Instant.now().plusSeconds(timeToLiveInSeconds).getEpochSecond());
+            ttlMap.put(key, timeManagementService.getEpochAfterDurationInSeconds(timeToLiveInSeconds));
     }
 
     @Override
     public V get(K key) {
+        Long expiration = ttlMap.get(key);
+        if(expiration != null && timeManagementService.getCurrentEpoch() > expiration) {
+            ttlMap.remove(key);
+            dataMap.remove(key);
+            return null;
+        }
+
         return dataMap.get(key);
     }
 
@@ -65,10 +74,9 @@ public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
         public void run() {
             if (ttlMap.isEmpty()) return;
 
-            var now = Instant.now().getEpochSecond();
             ttlMap.entrySet()
-                    .stream()
-                    .filter(entry -> now > entry.getValue())
+                    .parallelStream()
+                    .filter(entry -> timeManagementService.getCurrentEpoch() > entry.getValue())
                     .forEach(entry -> {
                         var key = entry.getKey();
                         ttlMap.remove(key);
