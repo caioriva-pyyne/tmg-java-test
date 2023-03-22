@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag(TestType.UNIT_TEST)
 public class StackServiceImplTests {
-    private StackService<String> stackService;
+    protected StackService<String> stackService;
 
     @BeforeEach
     public void setUp() {
-        stackService = new StackServiceImpl<>();
+        stackService = getStackServiceInstance();
     }
 
     @Test
@@ -45,7 +45,7 @@ public class StackServiceImplTests {
         Object secondItem = new Object();
         Object thirdItem = new Object();
 
-        StackService<Object> agnosticStackService = new StackServiceImpl<>();
+        StackService<Object> agnosticStackService = getStackServiceInstance();
         // Act
         agnosticStackService.push(firstItem);
         agnosticStackService.push(secondItem);
@@ -71,5 +71,9 @@ public class StackServiceImplTests {
         // Assert
         assertEquals(null, firstPoppedValue);
         assertEquals(null, secondPoppedValue);
+    }
+
+    protected <T> StackService<T> getStackServiceInstance() {
+        return new StackServiceImpl<>();
     }
 }

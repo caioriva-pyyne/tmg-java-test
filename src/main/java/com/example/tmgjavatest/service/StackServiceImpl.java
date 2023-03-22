@@ -1,8 +1,10 @@
 package com.example.tmgjavatest.service;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
+@Primary
 public class StackServiceImpl<T> implements StackService<T> {
     private Node head;
     private Node last;

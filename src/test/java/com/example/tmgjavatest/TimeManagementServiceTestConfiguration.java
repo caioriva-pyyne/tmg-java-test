@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 
 @Configuration
 public class TimeManagementServiceTestConfiguration {
-
     @Bean
     @Primary
     public TimeManagementServiceImpl timeManagementService() {
