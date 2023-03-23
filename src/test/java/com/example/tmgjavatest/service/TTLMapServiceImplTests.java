@@ -1,6 +1,7 @@
 package com.example.tmgjavatest.service;
 
 import com.example.tmgjavatest.TestType;
+import com.example.tmgjavatest.configuration.TTLMapConfiguration;
 import com.example.tmgjavatest.exception.NoKeyValuePairException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +29,8 @@ public class TTLMapServiceImplTests {
         timeManagementServiceMock = mock(TimeManagementServiceImpl.class);
         when(timeManagementServiceMock.getCurrentEpoch()).thenCallRealMethod();
         when(timeManagementServiceMock.getEpochAfterDurationInSeconds(anyLong())).thenCallRealMethod();
-        mapService = new TTLMapServiceImpl<>(timeManagementServiceMock);
+        mapService = new TTLMapServiceImpl<>(timeManagementServiceMock,
+                new TTLMapConfiguration(0, 20));
     }
 
     @AfterEach
@@ -56,7 +58,8 @@ public class TTLMapServiceImplTests {
         var value1 = new Object();
         var key1 = new Object();
 
-        TTLMapService<Object, Object> agnosticTTLMapService = new TTLMapServiceImpl<>(timeManagementServiceMock);
+        TTLMapService<Object, Object> agnosticTTLMapService = new TTLMapServiceImpl<>(timeManagementServiceMock,
+                new TTLMapConfiguration(0, 20));
 
         // Act
         agnosticTTLMapService.put(key1, value1, null);

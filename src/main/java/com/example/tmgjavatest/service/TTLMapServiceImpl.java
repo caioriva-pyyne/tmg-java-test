@@ -1,5 +1,6 @@
 package com.example.tmgjavatest.service;
 
+import com.example.tmgjavatest.configuration.TTLMapConfiguration;
 import com.example.tmgjavatest.exception.NoKeyValuePairException;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,22 +21,23 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class TTLMapServiceImpl<K, V> implements TTLMapService<K, V> {
-    private static final int CLEANER_EXECUTOR_INITIAL_DELAY = 0;
-    private static final int CLEANER_EXECUTOR_PERIOD = 900;
-
     private final ScheduledExecutorService executor;
     private final ConcurrentMap<K, Long> ttlMap;
     private final ConcurrentMap<K, V> dataMap;
     private final TimeManagementService timeManagementService;
+    private final TTLMapConfiguration configuration;
 
     @Autowired
-    public TTLMapServiceImpl(TimeManagementService timeManagementService) {
+    public TTLMapServiceImpl(TimeManagementService timeManagementService,
+                             TTLMapConfiguration configuration) {
         this.timeManagementService = timeManagementService;
+        this.configuration = configuration;
         ttlMap = new ConcurrentHashMap<>();
         dataMap = new ConcurrentHashMap<>();
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(new Cleaner(),
-                CLEANER_EXECUTOR_INITIAL_DELAY, CLEANER_EXECUTOR_PERIOD, TimeUnit.MILLISECONDS);
+                configuration.getCleanerJobInitialDelay(),
+                configuration.getCleanerJobPeriod(), TimeUnit.MILLISECONDS);
     }
 
     @PreDestroy
