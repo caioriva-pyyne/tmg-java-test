@@ -22,13 +22,13 @@ public class JDKCollectionStackService<T> implements StackService<T> {
 
     @Override
     public void push(T item) {
-        stack.add(item);
+        stack.push(item);
     }
 
     @Override
     public T pop() throws EmptyStackException {
         try {
-            return stack.removeLast();
+            return stack.pop();
         } catch (NoSuchElementException e) {
             throw new EmptyStackException();
         }
