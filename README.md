@@ -28,11 +28,27 @@ different prototype is specified. This guarantees that all threads (e.g. when di
 access the same in memory data structure.
 
 #### The StackService
-For the sake of actually implementing the FILO logic, no collection from JDK Collections API was used. However, in a 
-real case scenario, it would be better to use a thread-safe collection that supports FILO operations like [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html).
+For the sake of actually implementing the LIFO logic, the class [StackServiceImpl](src/main/java/com/example/tmgjavatest/service/TimeManagementServiceImpl.java) 
+was created, and it contains an implementation of a doubly linked list with synchronized methods for the push and pop operations. 
+`synchronized` keyword guarantees thread-safety by mutual exclusion: only one thread can execute a block of code (critical area) 
+at the same time and subsequent threads executing the same block are guarantee to see the modifications previously done.
 
-For this test, the implementation chosen was a doubly linked list with synchronized methods to achieve thread-safety in 
-the push and pop operations.
+Executing a synchronized block involves acquiring and releasing a lock (pessimistic approach). This process makes threads 
+read data from the main java program memory to their own thread memory when acquiring the lock and flush the main program 
+memory with the updated thread memory when releasing the lock. Eliminating memory inconsistencies.
+
+That said, this process is costly performance wise. It works based on a pessimistic locking algorithm, as threads need 
+to wait until they can perform the guarded operation.
+
+In a real case scenario it would be more advantageous to use a [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html)
+from JDK Collections API. This collection has pre-defined LIFO methods and uses compare-and-swap (CAS) operations (low level 
+atomic operations to compare and modify the content of a memory location) to achieve thread-safety. CAS algorithm uses an 
+optimistic approach by not locking and only checking collision detection of memory swaps to determine if there is an 
+inconsistency to fail and the other operations that caused the interference.
+
+For the sake of demonstration, a new class called [JDKCollectionStackService](src/main/java/com/example/tmgjavatest/service/JDKCollectionStackService.java)
+was created to demonstrate the usage of [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html)
+for this context.
 
 #### The TTLMapService
 For the sake of avoiding using third-party libraries or services, no caching library or library with cacheable data 
