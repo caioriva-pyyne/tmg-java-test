@@ -15,6 +15,9 @@ The following class diagram describes the main classes that compose the applicat
 * The class [JDKCollectionStackService](src/main/java/com/example/tmgjavatest/service/JDKCollectionStackService.java) 
  is not included in the diagram because it is not integral part of the application and was just created to demonstrate
  how a stack service would work using a [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html).
+* The class [TTLMapConfiguration](src/main/java/com/example/tmgjavatest/configuration/TTLMapConfiguration.java) is not
+included in the diagram but it's used to externalize configuration for the [TTLMapServiceImpl](src/main/java/com/example/tmgjavatest/service/TTLMapServiceImpl.java) 
+class in the [application.properties](src/main/resources/application.properties) file.
 
 ### Data Structure Services
 Both services that store the in memory data are [Spring Beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-definition).
@@ -24,7 +27,7 @@ access the same in memory data structure.
 
 #### The StackService
 For the sake of actually implementing the LIFO logic, the class [StackServiceImpl](src/main/java/com/example/tmgjavatest/service/TimeManagementServiceImpl.java)
-was created, and it contains an implementation of a doubly linked list with synchronized methods for the push and pop operations.
+was created, and it contains an implementation of a doubly linked list with synchronized methods for the `push` and `pop` operations.
 `synchronized` keyword guarantees thread-safety by mutual exclusion: only one thread can execute a block of code (critical area)
 at the same time and subsequent threads executing the same block are guarantee to see the modifications previously done.
 
@@ -46,15 +49,18 @@ was created to show how [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7
 could be used in this scenario.
 
 #### The TTLMapService
-For the sake of avoiding using third-party libraries or services, no caching library or library with cacheable data
-structures was used. However, in a real case scenario, it would be better to use them instead of manually running a
-background thread to check and remove expired entries.
+The implementation chosen uses [ConcurrentHashMap](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html)
+to store the data and to provide thread-safety (it uses a segmented lock mechanism which allows multiple threads to 
+lock multiple segments at the same time). This is more efficient than synchronizing an entire [HashMap](https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html).
 
-For this test, the implementation chosen was having two [ConcurrentHashMap](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentHashMap.html)
-instance variables, one for the data and another for expiration that would be checked and possibly updated on every
-get action or every 900ms seconds by a background thread (900ms was an arbitrary chosen number that is smaller than
-the minimal time to live that can be specified).
+For time-to-live management, two methods to evict expired entries were used: actively 
+removing expired entries whenever the `get` operation is called and running a background job in a separate thread to
+evict expired entries. The first method guarantees that a expired entry will never be returned to the client, whereas
+the second method ensures expired data are not kept in memory indefinitely if the get operation is not called.
 
+The logic for evicting expired entries in the background job has linear complexity (O(n)) as it requires iterating over 
+a list. Having the list ordered would increase the efficiency in the  background job but would result in increasing
+the complexity for the `put` operation (not recommended because it should have constant complexity (O(1)).
 
 ## Installing Dependencies
 Because this is a Java application that uses maven as the build and dependency management tool, to install the projects
