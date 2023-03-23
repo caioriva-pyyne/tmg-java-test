@@ -9,7 +9,12 @@ the application.
 
 ## Design Choices
 The following class diagram describes the main classes that compose the application:
+
 ![project-uml-class-diagram.png](project-uml-class-diagram.png)
+
+* The class [JDKCollectionStackService](src/main/java/com/example/tmgjavatest/service/JDKCollectionStackService.java) 
+ is not included in the diagram because it is not integral part of the application and was just created to demonstrate
+ how a stack service would work using a [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html).
 
 ### Data Structure Services
 Both services that store the in memory data are [Spring Beans](https://docs.spring.io/spring-framework/docs/current/reference/html/core.html#beans-definition).
