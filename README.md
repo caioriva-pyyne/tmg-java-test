@@ -3,7 +3,7 @@
 This is a Spring-Boot application created by Caio Riva as an assigment from TMG.
 
 ## Requirements
-This project was created using [JDK 19](https://jdk.java.net/19/) and 
+This project was created using [JDK 17](https://openjdk.org/projects/jdk/17/) (the latest LTS release) and 
 [Maven 3.8.1](https://maven.apache.org/docs/3.8.1/release-notes.html), so make sure to use them as well when running 
 the application.
 
