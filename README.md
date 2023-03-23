@@ -31,14 +31,14 @@ That said, this process is costly performance wise. It works based on a pessimis
 to wait until they can perform the guarded operation.
 
 In a real case scenario it would be more advantageous to use a [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html)
-from JDK Collections API. This collection has pre-defined LIFO methods and uses compare-and-swap (CAS) operations (low level
-atomic operations to compare and modify the content of a memory location) to achieve thread-safety. CAS algorithm uses an
-optimistic approach by not locking and only checking collision detection of memory swaps to determine if there is an
-inconsistency to fail and the other operations that caused the interference.
+from JDK Collections API. This collection uses compare-and-swap (CAS) operations (low level atomic operations to compare 
+and modify the content of a memory location) to achieve thread-safety. Those operations that are significantly less 
+expensive than synchronization and the JDK collection does this by leveraging native, JVM internal CAS operations that are 
+not typically available to developers (check sun.misc.Unsafe).
 
 For the sake of demonstration, a new class called [JDKCollectionStackService](src/main/java/com/example/tmgjavatest/service/JDKCollectionStackService.java)
-was created to demonstrate the usage of [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html)
-for this context.
+was created to show how [ConcurrentLinkedDeque](https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ConcurrentLinkedDeque.html)
+could be used in this scenario.
 
 #### The TTLMapService
 For the sake of avoiding using third-party libraries or services, no caching library or library with cacheable data
