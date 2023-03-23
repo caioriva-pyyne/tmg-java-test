@@ -15,37 +15,37 @@ import org.springframework.stereotype.Service;
 @Primary
 public class StackServiceImpl<T> implements StackService<T> {
     private Node head;
-    private Node last;
+    private Node tail;
 
     @Override
     public synchronized void push(T item) {
         var newNode = new Node(item);
         if (head == null) {
             head = newNode;
-            last = newNode;
+            tail = newNode;
             return;
         }
 
-        Node currentLastNode = last;
+        Node currentLastNode = tail;
         currentLastNode.next = newNode;
         newNode.previous = currentLastNode;
-        last = newNode;
+        tail = newNode;
     }
 
     @Override
     public synchronized T pop() throws EmptyStackException {
         if (head == null) throw new EmptyStackException();
 
-        T item = last.item;
-        if (last.previous == null) {
+        T item = tail.item;
+        if (tail.previous == null) {
             head = null;
-            last = null;
+            tail = null;
             return item;
         }
 
-        Node newLast = new Node(last.previous);
+        Node newLast = new Node(tail.previous);
         newLast.next = null;
-        last = newLast;
+        tail = newLast;
         return item;
     }
 
