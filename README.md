@@ -1,6 +1,6 @@
 # TMG Java Test
 
-This is a Spring-Boot application created by Caio Riva as an assigment from TMG.
+This is a Spring-Boot application created by Caio Riva as an assigment for TMG.
 
 ## Requirements
 This project was created using [JDK 17](https://openjdk.org/projects/jdk/17/) (the latest LTS release) and 
